@@ -68,6 +68,7 @@ services:
       - dvt-internal
     depends_on:
       - nethermind
+      - mev_boost
     volumes:
       - lighthouse_bn_data:/root/.lighthouse
       - ./jwt.hex:/jwt.hex:ro
@@ -82,6 +83,7 @@ services:
       - --execution-endpoint=http://nethermind:8551
       - --execution-jwt=/jwt.hex
       - --checkpoint-sync-url=${CHECKPOINT_SYNC_URL:-https://mainnet.checkpoint.sigp.io}
+      - --builder=http://mev_boost:18550
       - --http
       - --http-address=0.0.0.0
       - --http-port=5052
@@ -96,6 +98,27 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
+
+  # ----------------------------------------------------------------------------
+  # 2b. MEV-Boost: External Block Builder Relay Proxy
+  # ----------------------------------------------------------------------------
+  mev_boost:
+    image: flashbots/mev-boost:v1.8.0
+    container_name: csm_mev_boost
+    restart: unless-stopped
+    networks:
+      - dvt-internal
+    command:
+      - -${NETWORK:-mainnet}
+      - -loglevel=info
+      - -addr=0.0.0.0:18550
+      - -relay-check
+      - -relays=${MEV_RELAYS:-https://0xac6e77dfe25ecd6110b8e780608cce0dab71fdd5ebea22a16c0205200f2f8424e0004fcedfe20fe6d412d3257371c26e@builder-relay.flashbots.net,https://0xa1559ace749688b30f0e49e130e1528612e3a04643a508b90224130f01a454c60651307141b073b80b0422a433080e70@relay.ultrasound.money,https://0xa7ab67ea25d143680e14cb7b0154784111295a05401583ab89f63925844048b88170829164866b399d713c57b60fd9d3@agnostic-relay.net}
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:18550/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
 
   # ----------------------------------------------------------------------------
   # 3. DVT Middleware: Obol Charon (3-of-4 BFT Proxy)
