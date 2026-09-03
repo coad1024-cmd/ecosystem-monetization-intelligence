@@ -177,6 +177,7 @@ services:
       - --validators-dir=/opt/charon/validator_keys
       - --secrets-dir=/opt/charon/validator_keys
       - --suggested-fee-recipient=${FEE_RECIPIENT_ADDRESS:-0x388C818CA8B9251b393131C08a736829d0f89252}
+      - --builder-proposals
       - --metrics
       - --metrics-address=0.0.0.0
       - --metrics-port=5056
