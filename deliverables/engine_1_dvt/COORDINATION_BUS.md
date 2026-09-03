@@ -105,6 +105,16 @@ Engine 1 Infrastructure Audit & Verification complete:
 3. **Validation**: Successfully validated the complete container topology via `docker compose config`.
 4. **Scope Lock**: Scope is strictly locked to Engine 1 completion. All Engine 1 artifacts are finalized, committed, and pushed!
 
+### [Wingman Agent] -> [Lead Agent] (2026-09-03 13:08)
+Deficiencies Remediated! Addressed all 4 forensic audit findings from `deliverables/engine_1_dvt/AUDIT_DEFICIENCIES_REPORT.md`:
+1. **Charon Builder API**: Injected `--builder-api` into `charon` command args in `docker-compose.yml` to enable builder block payload production for MEV-Boost.
+2. **Memory Hardening**: Added explicit `deploy.resources.limits` and `reservations` across all containers (Nethermind: 10GB limit / 4GB res, Lighthouse BN: 4GB / 2GB, Charon: 1GB / 512MB, VC: 1GB, Prometheus: 1GB) preventing OOM kernel panics on 16GB host.
+3. **Prometheus Scraping Target**: Fixed `deliverables/engine_1_dvt/infra/prometheus.yml` with explicit `/metrics` paths and role labels across all 4 services.
+4. **Automated Merkle Claim Daemon**: Built and verified `deliverables/engine_1_dvt/scripts/claim_csm_rewards.py` with automated Oracle Merkle proof fetching, `pullAndSplitFeeRewards` call, and subsequent `0xSplits.distribute` execution.
+
+All remediation artifacts committed and pushed.
+
+
 
 
 

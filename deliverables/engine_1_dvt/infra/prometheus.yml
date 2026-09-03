@@ -4,17 +4,29 @@ global:
 
 scrape_configs:
   - job_name: "charon"
+    metrics_path: /metrics
     static_configs:
       - targets: ["charon:3620"]
+        labels:
+          role: "dvt-middleware"
 
   - job_name: "lighthouse_bn"
+    metrics_path: /metrics
     static_configs:
       - targets: ["lighthouse_bn:5054"]
+        labels:
+          role: "consensus-beacon-node"
 
   - job_name: "lighthouse_vc"
+    metrics_path: /metrics
     static_configs:
       - targets: ["lighthouse_vc:5056"]
+        labels:
+          role: "validator-client"
 
   - job_name: "nethermind"
+    metrics_path: /metrics
     static_configs:
       - targets: ["nethermind:6060"]
+        labels:
+          role: "execution-client"
