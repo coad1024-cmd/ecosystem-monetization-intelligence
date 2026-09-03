@@ -65,6 +65,9 @@ The Coordinator (Operator 1) constructs the formal `cluster-definition.json` fil
 
 ### 3.2 Execution Command (Run by Coordinator):
 ```bash
+# Set SPLIT_CONTRACT_ADDRESS to your deployed 4-way 0xSplits v2 contract address
+SPLIT_CONTRACT_ADDRESS="0xYourDeployed0xSplitsContractAddress"
+
 docker run --rm -v "$(pwd)/.charon:/opt/charon/.charon" obolnetwork/charon:v1.3.0 create cluster \
   --name="csm-dvt-cluster-alpha" \
   --cluster-dir="/opt/charon/.charon" \
@@ -72,7 +75,8 @@ docker run --rm -v "$(pwd)/.charon:/opt/charon/.charon" obolnetwork/charon:v1.3.
   --nodes=4 \
   --num-validators=10 \
   --withdrawal-addresses="0x010000000000000000000000b9d7934878b5fb9610b3fe8a5e441e8fad7e293f" \
-  --fee-recipient-addresses="0x388C818CA8B9251b393131C08a736829d0f89252" \
+  --fee-recipient-addresses="${SPLIT_CONTRACT_ADDRESS}" \
+  --p2p-relays="https://0.relay.obol.tech,https://1.relay.obol.tech" \
   --nodes-addresses="enr:-JG4QOp1...,enr:-JG4QOp2...,enr:-JG4QOp3...,enr:-JG4QOp4..."
 ```
 
