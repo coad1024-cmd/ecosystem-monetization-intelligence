@@ -1,12 +1,7 @@
 #!/usr/bin/env python3
 """
 Lido CSM & 0xSplits Automated Reward Claiming & Distribution Daemon.
-
-Functionality:
-1. Queries the Lido Community Staking Module (CSM) Accounting contract for unbonded / accrued fee shares.
-2. Fetches the latest Performance Oracle Merkle distribution tree and proofs from the Lido API / IPFS.
-3. Calls `CSAccounting.pullAndSplitFeeRewards(nodeOperatorId, cumulativeFeeShares, rewardsProof)` to mint stETH shares to the configured rewardAddress (0xSplits contract).
-4. Calls `0xSplits.distributeERC20` / `distributeETH` to immediately push 25% pro-rata rewards to all 4 DVT operators.
+Production-hardened implementation with Web3.py transaction submission.
 """
 
 import os
@@ -17,13 +12,12 @@ import argparse
 import logging
 from typing import Dict, List, Optional
 import urllib.request
+from web3 import Web3
+from eth_account import Account
 
 logging.basicConfig(level=logging.INFO, format="[%(asctime)s] [%(levelname)s] %(message)s")
 logger = logging.getLogger("CSM_Claimer")
 
-# ------------------------------------------------------------------------------
-# Protocol Contract Addresses
-# ------------------------------------------------------------------------------
 CONFIGS = {
     "mainnet": {
         "chainId": 1,
@@ -45,21 +39,7 @@ CONFIGS = {
     }
 }
 
-# Minimal ABIs
 CS_ACCOUNTING_ABI = [
-    {
-        "inputs": [{"name": "nodeOperatorId", "type": "uint256"}],
-        "name": "getNodeOperator",
-        "outputs": [
-            {"name": "totalDepositedKeys", "type": "uint256"},
-            {"name": "totalVettedKeys", "type": "uint256"},
-            {"name": "totalEnqueuedKeys", "type": "uint256"},
-            {"name": "rewardAddress", "type": "address"},
-            {"name": "managerAddress", "type": "address"}
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
     {
         "inputs": [
             {"name": "nodeOperatorId", "type": "uint256"},
@@ -67,18 +47,17 @@ CS_ACCOUNTING_ABI = [
             {"name": "rewardsProof", "type": "bytes32[]"}
         ],
         "name": "pullAndSplitFeeRewards",
-        "outputs": [],
+        "outputs": [{"name": "claimableShares", "type": "uint256"}],
         "stateMutability": "nonpayable",
         "type": "function"
     }
 ]
 
-SPLIT_V2_ABI = [
+SPLIT_PULL_ABI = [
     {
         "inputs": [
             {"name": "split", "type": "address"},
-            {"name": "token", "type": "address"},
-            {"name": "distributorParams", "type": "bytes"}
+            {"name": "token", "type": "address"}
         ],
         "name": "distribute",
         "outputs": [],
@@ -87,101 +66,118 @@ SPLIT_V2_ABI = [
     }
 ]
 
-def fetch_csm_merkle_proof(oracle_api: str, node_operator_id: int) -> Optional[Dict]:
-    """
-    Fetches the latest rewards distribution Merkle proof for a given operator ID.
-    """
-    url = f"{oracle_api}?operatorId={node_operator_id}"
-    logger.info(f"Querying Lido CSM Rewards Oracle API: {url}")
+
+def fetch_csm_merkle_proof(api_url: str, node_operator_id: int) -> Optional[Dict]:
+    url = f"{api_url}?operatorId={node_operator_id}"
+    req = urllib.request.Request(url, headers={"User-Agent": "Engine1-CSM-Daemon/1.0"})
     try:
-        req = urllib.request.Request(url, headers={"User-Agent": "Lido-CSM-DVT-Claimer/1.0"})
-        with urllib.request.urlopen(req, timeout=15) as response:
-            if response.status == 200:
-                data = json.loads(response.read().decode("utf-8"))
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            if resp.status == 200:
+                data = json.loads(resp.read().decode("utf-8"))
                 return data
     except Exception as e:
-        logger.warning(f"Could not fetch remote oracle tree directly: {e}. Falling back to simulation mode.")
+        logger.warning(f"Unable to fetch Merkle proof from {url}: {e}")
     return None
+
 
 def claim_and_distribute(
     network: str,
     node_operator_id: int,
     split_address: str,
     rpc_url: str,
-    private_key: Optional[str],
+    private_key: Optional[str] = None,
     dry_run: bool = False
 ):
-    """
-    Executes the two-step claim and split sequence.
-    """
     cfg = CONFIGS.get(network)
     if not cfg:
         raise ValueError(f"Unknown network: {network}")
 
     logger.info(f"=== Lido CSM Reward Claiming Run ===")
     logger.info(f"Network: {network} | Operator ID: {node_operator_id} | Split Address: {split_address}")
-    
+
     proof_data = fetch_csm_merkle_proof(cfg["oracleApi"], node_operator_id)
-    
     if proof_data:
         cumulative_shares = int(proof_data.get("cumulativeFeeShares", 0))
-        proof = proof_data.get("proof", [])
+        proof = [bytes.fromhex(p[2:] if p.startswith("0x") else p) for p in proof_data.get("proof", [])]
         logger.info(f"Discovered Claimable Cumulative Shares: {cumulative_shares} (Proof length: {len(proof)})")
     else:
-        logger.info("No new rewards proof available for this frame or node operator.")
+        logger.info("No active Merkle tree update for this operator. Using mock/zero proof.")
         cumulative_shares = 0
         proof = []
 
     if dry_run:
-        logger.info("[DRY RUN] Simulation complete. No on-chain transactions broadcast.")
+        logger.info("[DRY RUN] Simulation mode. Skipping live on-chain transaction broadcast.")
         return
 
     if not private_key:
-        logger.error("Private key required for live transaction broadcast. Provide via --private-key or ETH_PRIVATE_KEY env var.")
+        logger.error("Private key required for live transaction broadcast.")
         return
 
-    logger.info(f"Executing step 1: CSAccounting.pullAndSplitFeeRewards({node_operator_id}, {cumulative_shares})...")
-    # Live Web3 transaction broadcast logic here
-    logger.info(f"Executing step 2: 0xSplits.distribute({split_address}, {cfg['stETH']})...")
-    logger.info("Successfully claimed and distributed 4-way pro-rata stETH shares to operators!")
+    w3 = Web3(Web3.HTTPProvider(rpc_url))
+    account = Account.from_key(private_key)
+    sender = account.address
+
+    cs_accounting = w3.eth.contract(address=Web3.to_checksum_address(cfg["csAccounting"]), abi=CS_ACCOUNTING_ABI)
+    split_contract = w3.eth.contract(address=Web3.to_checksum_address(split_address), abi=SPLIT_PULL_ABI)
+
+    # Step 1: Pull and split fee rewards from Lido CSAccounting
+    if cumulative_shares > 0 and len(proof) > 0:
+        logger.info(f"Broadcasting pullAndSplitFeeRewards({node_operator_id}, {cumulative_shares})...")
+        tx1 = cs_accounting.functions.pullAndSplitFeeRewards(
+            node_operator_id, cumulative_shares, proof
+        ).build_transaction({
+            "from": sender,
+            "nonce": w3.eth.get_transaction_count(sender),
+            "gasPrice": w3.eth.gas_price,
+            "chainId": cfg["chainId"]
+        })
+        signed_tx1 = w3.eth.account.sign_transaction(tx1, private_key)
+        tx1_hash = w3.eth.send_raw_transaction(signed_tx1.rawTransaction)
+        logger.info(f"Step 1 TX Broadcast: {tx1_hash.hex()}. Awaiting confirmation...")
+        w3.eth.wait_for_transaction_receipt(tx1_hash)
+        logger.info("Step 1 confirmed!")
+
+    # Step 2: Distribute stETH from 0xSplits
+    logger.info(f"Broadcasting 0xSplits distribute for stETH ({cfg['stETH']})...")
+    tx2 = split_contract.functions.distribute(
+        Web3.to_checksum_address(split_address),
+        Web3.to_checksum_address(cfg["stETH"])
+    ).build_transaction({
+        "from": sender,
+        "nonce": w3.eth.get_transaction_count(sender),
+        "gasPrice": w3.eth.gas_price,
+        "chainId": cfg["chainId"]
+    })
+    signed_tx2 = w3.eth.account.sign_transaction(tx2, private_key)
+    tx2_hash = w3.eth.send_raw_transaction(signed_tx2.rawTransaction)
+    logger.info(f"Step 2 TX Broadcast: {tx2_hash.hex()}. Awaiting confirmation...")
+    w3.eth.wait_for_transaction_receipt(tx2_hash)
+    logger.info("Step 2 confirmed! Pro-rata rewards distributed to all 4 operators.")
+
 
 def main():
     parser = argparse.ArgumentParser(description="Lido CSM & 0xSplits Automated Reward Claimer")
-    parser.add_argument("--network", choices=["mainnet", "holesky"], default="mainnet", help="Target Ethereum network")
-    parser.add_argument("--operator-id", type=int, default=1, help="Lido CSM Node Operator ID")
-    parser.add_argument("--split-address", type=str, default=os.getenv("SPLIT_CONTRACT_ADDRESS", "0x0000000000000000000000000000000000000000"), help="0xSplits contract address")
-    parser.add_argument("--rpc-url", type=str, default=os.getenv("RPC_URL", "http://localhost:8545"), help="Ethereum Execution Client RPC URL")
-    parser.add_argument("--private-key", type=str, default=os.getenv("ETH_PRIVATE_KEY"), help="Operator Claimer Private Key")
-    parser.add_argument("--dry-run", action="store_true", help="Simulate without broadcasting transactions")
-    parser.add_argument("--daemon", action="store_true", help="Run continuously on a 24-hour interval")
-    parser.add_argument("--interval", type=int, default=86400, help="Polling interval in seconds for daemon mode")
-    
+    parser.add_argument("--network", choices=["mainnet", "holesky"], default="mainnet")
+    parser.add_argument("--operator-id", type=int, default=1)
+    parser.add_argument("--split-address", type=str, default=os.getenv("SPLIT_CONTRACT_ADDRESS", "0x0000000000000000000000000000000000000000"))
+    parser.add_argument("--rpc-url", type=str, default=os.getenv("RPC_URL", "http://localhost:8545"))
+    parser.add_argument("--private-key", type=str, default=os.getenv("ETH_PRIVATE_KEY"))
+    parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--daemon", action="store_true")
+    parser.add_argument("--interval", type=int, default=86400)
     args = parser.parse_args()
 
     if args.daemon:
-        logger.info(f"Starting CSM Claimer Daemon (interval: {args.interval}s)...")
+        logger.info(f"Starting Daemon (interval: {args.interval}s)...")
         while True:
             try:
-                claim_and_distribute(
-                    network=args.network,
-                    node_operator_id=args.operator_id,
-                    split_address=args.split_address,
-                    rpc_url=args.rpc_url,
-                    private_key=args.private_key,
-                    dry_run=args.dry_run
-                )
+                claim_and_distribute(args.network, args.operator_id, args.split_address, args.rpc_url, args.private_key, args.dry_run)
             except Exception as e:
                 logger.error(f"Error in claim cycle: {e}")
             time.sleep(args.interval)
     else:
-        claim_and_distribute(
-            network=args.network,
-            node_operator_id=args.operator_id,
-            split_address=args.split_address,
-            rpc_url=args.rpc_url,
-            private_key=args.private_key,
-            dry_run=args.dry_run
-        )
+        claim_and_distribute(args.network, args.operator_id, args.split_address, args.rpc_url, args.private_key, args.dry_run)
+
 
 if __name__ == "__main__":
     main()
