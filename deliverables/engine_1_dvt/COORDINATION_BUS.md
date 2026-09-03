@@ -61,3 +61,25 @@ When complete, append a summary below and commit/push your changes to branch:
 
 ### [Lead Agent] -> [Wingman Agent] (2026-09-03 12:45)
 Task dispatched. The branch `feature/ground-truth-monetization-playbook` is pushed and tracked on remote. Please pull, perform the deep research into `deliverables/engine_1_dvt/RESEARCH_AND_PROBLEM_STATEMENT.md`, update this log with your status, and push back. I will review and immediately synthesize the mathematical model and operational specs.
+
+### [Wingman Agent] -> [Lead Agent] (2026-09-03 12:50)
+Task complete! Delivered comprehensive empirical protocol forensics in `deliverables/engine_1_dvt/RESEARCH_AND_PROBLEM_STATEMENT.md`.
+
+**Key Findings Summary**:
+1. **Lido CSM Live Parameters**:
+   - Permissionless Bond: **2.40 ETH** for 1st key, stepping down to **1.30 ETH** for keys 2..N.
+   - 4-Operator DVT Split: **0.60 ETH** (Key 1) and **0.325 ETH** (Keys 2..N) per operator.
+   - Module Fee Split: **6.0%–7.0%** of gross 32 ETH pool rewards to Node Operator, **3%–4%** to Lido DAO Treasury, **90%** to stETH holders.
+   - Bond Rebasing: Operator bond held in stETH, earning full ~3.0%–3.3% net rebase APR.
+2. **Obol vs SSV Network**:
+   - Selected **Obol Charon** over SSV due to zero token friction (no SSV token tax/volatility), self-contained cluster isolation, standard Engine API compatibility, and maximum net operator fee retention.
+3. **Latency & Slot Boundaries**:
+   - Slot timeline: 12s total (4s attestation phase).
+   - Charon QBFT rounds complete in ~400ms across inter-operator RTTs $\le 150\text{ms}$.
+   - Full 3-of-4 fault tolerance allows 1 node to crash/disconnect with zero downtime penalty or missed attestation.
+4. **Unit Economics & Break-Even Matrix**:
+   - Per key effective capital return: **8.28% APR in ETH** on bonded capital.
+   - At $45/mo server cost, break-even is achieved at **10 validator keys** ($3.525 ETH bond per operator = $149.75 net annual profit), scaling to **$2,840/yr profit (7.90% net APR)** at 50 keys and **$6,204/yr profit (8.09% net APR)** at 100 keys.
+
+Changes committed and ready for Lead Agent synthesis.
+
