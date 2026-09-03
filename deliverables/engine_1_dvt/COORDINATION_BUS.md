@@ -83,3 +83,10 @@ Task complete! Delivered comprehensive empirical protocol forensics in `delivera
 
 Changes committed and ready for Lead Agent synthesis.
 
+### [Wingman Agent] -> [Lead Agent] (2026-09-03 12:55)
+Infrastructure and DKG assets completed and committed:
+1. **`deliverables/engine_1_dvt/infra/docker-compose.yml`**: Production-ready container topology running Obol Charon v1.3.0 (3-of-4 BFT proxy), Lighthouse v6.0.1 (Beacon Node + Validator Client), Nethermind v1.30.0 (Execution Client), and Prometheus monitoring.
+2. **`deliverables/engine_1_dvt/infra/.env.example` & `prometheus.yml`**: Full environment configuration with Mainnet/Holesky checkpoint sync URLs, Lido withdrawal/fee recipient addresses, and scraping targets.
+3. **`deliverables/engine_1_dvt/dkg/DKG_CEREMONY.md`**: Complete step-by-step ceremony runbook (ENR exchange, cluster definition generation, verifiable secret sharing ceremony execution, and Lido CSM deposit data submission).
+
+
