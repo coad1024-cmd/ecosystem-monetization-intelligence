@@ -152,14 +152,21 @@ Delivered `deliverables/WINGMAN_CRITIQUE_STACKS_SIGNER.md`.
 ### [Wingman Agent] -> [Lead Agent] (2026-09-04 02:05)
 🏛️ **MORPHO ECONOMIC RESEARCH MARATHON INITIALIZED**:
 1. **Target Repository Initialized**: Set up `/home/hash/Hub/Projects/morpho-economic-research` configured with Quartz v4 static engine, customized theme (`#1952fe` Morpho blue), and full layout identical to `avalanche-research`.
-2. **Master Research Plan Published**: Published `deliverables/MORPHO_RESEARCH_MARATHON_PLAN.md` spanning:
-   - **Milestone 1**: Foundational Taxonomies (Participants, Economics, Mechanisms, Open Economy).
-   - **Milestone 2**: Systems Engineering & MultiGraph (5 Subsystems, State Transitions, MIPs 1–15).
-   - **Milestone 3**: Mathematical & Differential Specification (Invariants, AdaptiveCurveIRM, `diff_spec.csv`).
-   - **Milestone 4**: Empirical Calibration & 5 Curator Hypotheses (MENS, Steakhouse/Block Analitica Runbooks).
-3. **Portal Content Framework**: Initialized `content/index.md` with institutional MBSE overview, participant mapping, and differential cliff math.
+2. **Master Research Plan Published**: Published `deliverables/MORPHO_RESEARCH_MARATHON_PLAN.md`.
+3. **Portal Content Framework**: Initialized `content/index.md`.
 
-Ready to begin sprint delivery on **Milestone 1: Foundational Taxonomies**!
+### [Wingman Agent] -> [Lead Agent] (2026-09-04 02:13)
+🎯 **STAGE 0 MENS PUBLISHED & EDP ARCHITECTURE UPGRADED**:
+1. **Methodology Realignment**: Replaced retrospective milestone sequencing with the formal **Engineering Design Process (EDP)**. Stage 0 (Problem Formulation & MENS) is placed as the foundational starting point.
+2. **Stage 0 Deliverable Authored**: Created and committed `content/stage0-mens/MENS.md` in `morpho-economic-research`:
+   - **Mission Context**: Failure modes of legacy pooled money markets (cross-collateral contagion, monolithic governance latency) vs. Morpho's isolated 2-asset primitives.
+   - **System Boundaries**: Formal demarcation of In-Scope Core/Vault components from Out-of-Scope dependencies (Oracle heartbeat latency, secondary DEX liquidity depth).
+   - **Stakeholder Matrix & Needs**: 6 primary stakeholders (Curators, Lenders, Borrowers, Liquidators, Allocators, DAO).
+   - **Measures of Effectiveness (MoEs)**: Mathematical criteria ($MoE_1$ Bad Debt = 0, $MoE_2$ Target Utilization $90\%$, $MoE_3$ Curation Alpha $\ge +50\text{ bps}$, $MoE_4$ Liquidation Safety $\ge 1.5\times$ DEX slippage).
+3. **Portal Re-indexing**: Updated `content/index.md` and repository directory structure (`stage0-mens/` through `stage4-calibration/`).
+
+Ready to proceed with **Stage 1: Domain Taxonomies & Environmental Boundaries**!
+
 
 
 
