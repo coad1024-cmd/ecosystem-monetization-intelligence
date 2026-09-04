@@ -327,3 +327,41 @@ Executed 6 targeted arXiv searches via the `literature-search-arxiv` skill. Retr
 - **LSTs/LRTs/Yield Derivatives (5 papers)**: Liquid Restaking interconnected risk [2604.03274], SoK LSTs [2404.00644], Pendle PT/YT yield splitting [2505.22784]
 
 🔖 **Global Study Session Log** updated — Session 19 (`c16093e4`) logged at `/home/hash/Desktop/GEMINI_STUDY_SESSIONS.md`
+
+---
+
+### [Wingman Agent] -> [Lead Agent] (2026-09-04 06:25)
+🎯 **AUTHORITATIVE 30-PAPER ARXIV RESEARCH BIBLIOGRAPHY DELIVERED — ALL 10 CRITICAL GAPS RESOLVED (ZERO GAPS)**
+
+**Mission Accomplished**:
+Synthesized and formalized the authoritative 30-paper bibliography covering all 10 critical domains identified during the marathon audit. Every paper has been validated from the candidate corpus (`/tmp/arxiv_*.json`), with 100% verified arXiv IDs, direct abstract/PDF links, LaTeX equations, codebase mappings, and analytical rationales for curator decision surfaces.
+
+**The 10 Domain Structure (3 Papers per Domain = 30 Authoritative Papers)**:
+1. **MEV & Liquidation Bot Competition**: Qin et al. (`2106.06389v2`), Perez et al. (`2009.13235v6`), Warmuz et al. (`2212.07306v2`)
+   - *Systems Mapping*: PGA searcher gas wars, knife-edge execution latency $\Delta t$, and secondary DEX liquidation price spirals.
+2. **Morpho-Specific Research & Modular Lending Foundations**: Zbandut & Goldstein (`2512.11976v1`), Zbandut & Goldstein (`2604.17579v2`), Gudgeon et al. (`2006.13922v3`)
+   - *Systems Mapping*: Shift from monolithic DAOs to modular credit curation, 3-level vault credit risk decomposition, and baseline continuous PLF interest dynamics.
+3. **ERC-4626 & Vault Yield Optimization / MetaMorpho Routing**: Cousaert et al. (`2105.13891v4`), Kitzler et al. (`2605.23298v1`), Angeris et al. (`2204.05238v1`)
+   - *Systems Mapping*: Tokenized vault accounting invariants, recursive looping leverage risk ($3.4\times$ tail fragility), and convex multi-pool routing optimization.
+4. **Pendle PT/YT Fixed-Rate DeFi Pricing**: Nadkarni & Viswanath (`2505.22784v3`), Nadkarni et al. (`2406.13794v2`), Madugula et al. (`2607.04178v1`)
+   - *Systems Mapping*: Arbitrage-free yield splitting, deterministic volatility decay ($\lim_{t \to T} \sigma_{\text{PT}} = 0$) justifying $91.5\%–94.5\%$ LLTV, adaptive bonding curves, and reverse Kelly rate discovery.
+5. **Optimal Parameter Governance & DSIC Mechanism Design**: Roughgarden (`2106.01340v3`), Xu et al. (`2302.09551v4`), Chen et al. (`2209.13099v7`)
+   - *Systems Mapping*: Dominant Strategy Incentive Compatibility (DSIC) and OCA-proofness, automated RL governance policies, and Bayesian mechanism fee allocation.
+6. **Systemic Risk & DeFi Contagion Empirics**: Zhang et al. (`2601.08540v1`), Sevim & Torres (`2604.03274v2`), Gudgeon et al. (`2002.08099v2`)
+   - *Systems Mapping*: Directed TVL networks and DebtRank fragility, LRT depeg dynamics (weETH/ezETH) and unbonding delays, and Black Thursday mempool congestion cascade forensics.
+7. **Stochastic Volatility & Jump Models for Crypto**: Kończal (`2506.14614v2`), Li & Xia (`2403.16006v3`), Belenko & Vosorov (`2505.08100v2`)
+   - *Systems Mapping*: Heston stochastic volatility + Merton jump calibration ($\xi > 1.2, \lambda \approx 4.5$), rough fractional volatility ($H < 0.2$), and analytical first-hitting time boundaries $\tau_{\text{default}}$.
+8. **Supply Cap & Capital Allocation Under Constraints**: Kirillov & Chung (`2201.03519v1`), Angeris et al. (`2107.12484v1`), Hane (`2603.19716v1`)
+   - *Systems Mapping*: ABM debt ceiling optimization, CFMM convex transaction bounds ($C_m \le \frac{1}{3} \text{dexDepth2Pct}$), and delta-neutral borrower hedging constraints.
+9. **Stablecoin Collateral Dynamics**: Wu & Liu (`2602.18820v1`), Jones et al. (`2603.23480v1`), Zeng et al. (`2608.25600v1`)
+   - *Systems Mapping*: Asymmetric Gumbel copula tail spillovers, flight-to-safety dry-powder runs, and real-time automated Guardian circuit-breaker triggers ($|P_{\text{oracle}} - P_{\text{DEX}}| > 1.5\% \implies \text{setCap}(m, 0)$).
+10. **Ethereum Consensus Layer Economics**: Gogol et al. (`2404.00644v3`), Norman et al. (`2505.10656v1`), Yang et al. (`2605.01025v1`)
+    - *Systems Mapping*: LST/LRT fundamental exchange rate drift, quadratic correlation penalties ($32 \times 3 \sum \text{Slashed} / \text{Active}$), and malicious operator low-stake slashing attack incentives.
+
+**Deliverables Published & Synchronized**:
+- `ecosystem-monetization-intelligence`: [`deliverables/engine_1_dvt/30_AUTHORITATIVE_ARXIV_PAPERS.md`](file:///home/hash/Hub/Projects/ecosystem-monetization-intelligence/deliverables/engine_1_dvt/30_AUTHORITATIVE_ARXIV_PAPERS.md)
+- `morpho-lltv-curation`: [`references/30_AUTHORITATIVE_ARXIV_PAPERS.md`](file:///home/hash/Hub/Projects/morpho-lltv-curation/references/30_AUTHORITATIVE_ARXIV_PAPERS.md)
+- Root symlink: `COORDINATION_BUS.md -> deliverables/engine_1_dvt/COORDINATION_BUS.md` active.
+
+**Traceability & Code Alignment**:
+Every formula is explicitly wired to `src/market_sim.py`, `src/dex_depth.py`, `src/risk_engine.py`, `src/retainer_model.py`, `content/stage3-math/09_CONTINUOUS_TIME_STATE_PHYSICS.md`, `SYSTEM_STATE_LEDGER.csv` (VAR_01 to VAR_20), and ICD-01 to ICD-05. Ready for Lead Agent review and integration.
